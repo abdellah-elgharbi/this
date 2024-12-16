@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier un Module</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Modifier un Module</h1>
+
+    <form th:action="@{/modules/update}" method="post">
+        <input type="hidden" name="id_module" th:value="${module.id_module}">
+        <div class="form-group">
+            <label for="nom">Nom du Module :</label>
+            <input type="text" id="nom" name="nom" class="form-control" th:value="${module.nom}" required>
+        </div>
+        <div class="form-group">
+            <label for="id_option">ID de l'Option :</label>
+            <input type="number" id="id_option" name="option.id_Option" class="form-control" th:value="${module.option.id_Option}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    </form>
+</div>
+</body>
+</html>

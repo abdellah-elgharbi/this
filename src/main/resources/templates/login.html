@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion</title>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="shortcut icon" th:href="@{/images/favicon.svg}" type="image/x-icon">
+
+  <!-- Ajout des styles -->
+  <style>
+    body {
+      background: url('/images/fac2.jpg') no-repeat center center fixed !important;
+      background-size: cover !important;
+      height: 100%;
+      margin: 0;
+      margin-top: 40px;
+    }
+
+
+
+  </style>
+</head>
+<body>
+<div >
+  <div class="container" >
+    <div class="row">
+      <div class="col-md-5 col-sm-12 mx-auto">
+        <div class="card pt-4">
+          <div class="card-body">
+            <div class="text-center mb-5">
+              <img th:src="@{/images/login.jpg}" height="140" class="mb-4">
+              <h3>Page de Connexion</h3>
+              <p>Veuillez vous connecter .</p>
+            </div>
+            <!-- Formulaire de connexion -->
+            <form th:action="@{/login}" method="post">
+              <div class="form-group position-relative has-icon-left">
+                <label for="username">Nom d'utilisateur :</label>
+                <div class="position-relative">
+                  <input type="text" id="username" name="username" class="form-control" required>
+                  <div class="form-control-icon">
+                    <i data-feather="user"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group position-relative has-icon-left">
+                <label for="password">Mot de passe :</label>
+                <div class="position-relative">
+                  <input type="password" id="password" name="password" class="form-control" required>
+                  <div class="form-control-icon">
+                    <i data-feather="lock"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="clearfix my-4">
+                <div class="form-check float-start">
+                  <input type="checkbox" id="checkbox1" class="form-check-input">
+                  <label for="checkbox1">Se souvenir de moi</label>
+                </div>
+                <div class="float-end">
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Mot de passe oublié ?</a>
+                </div>
+              </div>
+              <div class="clearfix">
+                <button type="submit" class="btn btn-primary float-end">Se connecter</button>
+              </div>
+            </form>
+            <div class="divider">
+              <div class="divider-text">OU</div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <button class="btn btn-block mb-2 btn-primary">
+                  <i data-feather="facebook"></i> Facebook
+                </button>
+              </div>
+              <div class="col-sm-6">
+                <button class="btn btn-block mb-2 btn-secondary">
+                  <i data-feather="github"></i> Github
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pour la récupération du mot de passe -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="forgotPasswordLabel">Récupération de mot de passe</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form th:action="@{/mailService}" method="post">
+          <div class="form-group mb-3">
+            <label for="email">Adresse email :</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Envoyer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/js/feather.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

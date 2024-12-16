@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Départements</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="shortcut icon" th:href="@{/images/favicon.svg}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+</head>
+<body>
+<div id="app">
+    <span th:replace="fragments/sidebar :: sidebar"></span>
+    <div id="main">
+        <div class="main-content container-fluid mt-4">
+            <!-- Messages de succès et d'erreur -->
+            <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <!-- Recherche par Nom -->
+            <h2>Recherche par Nom du Département</h2>
+            <form class="mb-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchName" placeholder="Entrez le nom du département" oninput="searchDepartements()">
+                </div>
+            </form>
+
+            <!-- Boutons pour ajouter et importer -->
+            <div class="d-flex justify-content-between align-items-center mt-5">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="bi bi-plus-circle"></i> Ajouter un Département
+                </button>
+                <form id="fileUploadForm" action="/departements/upload" method="post" enctype="multipart/form-data" class="d-inline-flex">
+                    <input type="file" class="form-control" id="fileInput" name="file" accept=".csv, .xls, .xlsx" required>
+                    <button type="submit" class="btn btn-primary ms-2">
+                        <i class="bi bi-upload"></i> Importer
+                    </button>
+                </form>
+            </div>
+
+            <!-- Liste des Départements -->
+            <h2>Liste des Départements</h2>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Nom du Département</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="departementsList">
+                <tr th:each="departement : ${departements}">
+                    <td>
+                        <a th:href="@{'/departements/' + ${departement.idDepartement} + '/enseignants'}"
+                           th:text="${departement.nomDepartement}"></a>
+                    </td>
+                    <td>
+                        <a th:href="@{'/departements/delete/' + ${departement.idDepartement}}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce département ?');">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </a>
+                        <button class="btn btn-warning btn-sm"
+                                th:onclick="fillEditForm([[${departement.idDepartement}]], '[[${departement.nomDepartement}]]')"
+                                data-bs-toggle="modal" data-bs-target="#editModal">
+                            <i class="bi bi-pencil-square"></i> Modifier
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- Modal pour Ajouter un Département -->
+            <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="/departements/add" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addModalLabel">Ajouter un Département</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="nomDepartement" class="form-label">Nom du Département</label>
+                                    <input type="text" class="form-control" id="nomDepartement" name="nomDepartement" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-success">Ajouter</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal pour Modifier un Département -->
+            <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="/departements/update" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">Modifier le Département</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="editIdDepartement" name="idDepartement">
+                                <div class="mb-3">
+                                    <label for="editNomDepartement" class="form-label">Nom du Département</label>
+                                    <input type="text" class="form-control" id="editNomDepartement" name="nomDepartement" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchDepartements() {
+        const searchName = document.getElementById('searchName').value;
+
+        fetch(`/departements/search?searchName=${searchName}`)
+            .then(response => response.json())
+            .then(data => {
+                const departementsList = document.getElementById('departementsList');
+                departementsList.innerHTML = '';
+
+                data.forEach(departement => {
+                    departementsList.innerHTML += `
+                    <tr>
+                        <td>
+                            <a href="/departements/${departement.idDepartement}/enseignants">${departement.nomDepartement}</a>
+                        </td>
+                        <td>
+                            <a href="/departements/delete/${departement.idDepartement}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce département ?');">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </a>
+                            <button class="btn btn-warning btn-sm"
+                                    onclick="fillEditForm(${departement.idDepartement}, '${departement.nomDepartement.replace(/'/g, "\\'")}')"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editModal">
+                                <i class="bi bi-pencil-square"></i> Modifier
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                });
+            });
+    }
+
+    function fillEditForm(id, name) {
+        document.getElementById("editIdDepartement").value = id;
+        document.getElementById("editNomDepartement").value = name.trim();
+    }
+
+    document.getElementById("fileUploadForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+
+        try {
+            const response = await fetch('/departements/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || 'Fichier importé avec succès.');
+                searchDepartements();
+            } else {
+                const errorMessage = await response.json();
+                alert('Erreur: ' + (errorMessage.message || 'Erreur inconnue'));
+            }
+        } catch (error) {
+            alert('Erreur lors de l\'importation du fichier : ' + error.message);
+        }
+    });
+</script>
+<script th:src="@{/js/feather.min.js}"></script>
+<script th:src="@{/js/perfect-scrollbar.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/Chart.min.js}"></script>
+<script th:src="@{/js/apexcharts.min.js}"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
